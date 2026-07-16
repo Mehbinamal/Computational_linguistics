@@ -1,0 +1,15 @@
+This is a test file.
+Humbert Humbert walked down the street.
+the the bug is here.
+the bug is not repeated.
+the big bug is also not repeated.
+123 starts with number and ends with word
+42 answer
+999 888 777
+hello world 123
+The raven flew into the grotto.
+The grotto was dark, but the raven was there.
+grottos are not the same as grotto.
+Ravens are birds.
+Hello, world. How are you today? Fine, thank you!
+Goodbye! See you later.

@@ -13,9 +13,9 @@ def chatbot(user_input):
     
     patterns = [
         (r"hello|hi|hey", "Hello! How can I assist you with your order or service?"),
-        (r"order (.*)", "Let me check your order {0}. Do you have the order number?"),
+        (r"(.*)order(.*)", "Let me check your order. Do you have the order number?"),
         (r"([1-9][0-9]+)", "Thank you for providing the order number {0}. I will look into it."),
-        (r"not working|broken|issue", "I'm sorry you're having trouble. Can you describe the issue?"),
+        (r"(.*)(not working|broken|issue)", "I'm sorry you're having trouble. Can you describe the issue?"),
         (r"bye|goodbye", "Thank you for contacting us. Have a great day!")
     ]
     
