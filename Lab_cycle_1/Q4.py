@@ -56,6 +56,8 @@ pattern = re.compile(
     re.IGNORECASE
 )
 
+print('--------------------------------------------------------')
+
 for word in ["toys", "boys", "ponies", "skies", "puppies", "bunnies","boies","toies"]:
     if pattern.match(word):
         print(f"{word} matches the regex pattern.")
