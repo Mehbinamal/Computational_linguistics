@@ -73,67 +73,78 @@ class BigramSpellChecker:
         return valid_candidates
 
     def score_sentence(self, tokens):
+        """
+        Bidirectional bigram scoring: for each word, combines
+        P(word | prev_word) and P(next_word | word) when both exist.
+        Falls back to just P(word | prev_word) at the end of the sentence.
+        """
         log_prob = 0.0
-
-        prev_word = "<s>"
-
         temp_vocab_size = self.vocab_size + 1
-        for word in tokens:
-            # Calculate P(word | prev_word)
-            numerator = self.bigram_counts.get((prev_word, word), 0) + 1  # +1 smoothing
-            
-            # Denominator: count(prev_word) + V
-            if prev_word == "<s>":
-                # For start token, we don't have a count. We just use a fake count of 1.
-                denominator = 1 + temp_vocab_size
+        padded = ["<s>"] + tokens + ["</s>"]
+
+        for i in range(1, len(padded) - 1):
+            prev_word = padded[i - 1]
+            word = padded[i]
+            next_word = padded[i + 1]
+
+            # P(word | prev_word)
+            num_prev = self.bigram_counts.get((prev_word, word), 0) + 1
+            denom_prev = (1 if prev_word == "<s>" else self.unigram_counts.get(prev_word, 0)) + temp_vocab_size
+            prob_prev = num_prev / denom_prev
+
+            # P(next_word | word) -- only if next_word isn't the artificial end pad
+            if next_word != "</s>":
+                num_next = self.bigram_counts.get((word, next_word), 0) + 1
+                denom_next = self.unigram_counts.get(word, 0) + temp_vocab_size
+                prob_next = num_next / denom_next
+                # geometric mean of the two directions in log-space
+                log_prob += 0.5 * (math.log(prob_prev) + math.log(prob_next))
             else:
-                denominator = self.unigram_counts.get(prev_word, 0) + temp_vocab_size
-                
-            prob = numerator / denominator
-            log_prob += math.log(prob)
-            prev_word = word
-                
+                log_prob += math.log(prob_prev)
+
         return log_prob
 
     def correct_sentence(self, input_text):
         errors, tokens = self.detect_errors(input_text)
-        
+
         if not errors:
             print("\n✅ No spelling errors detected.")
             return input_text
         corrected_tokens = tokens[:]
-        
+
         for idx, misspelled_word in errors:
             candidates = self.generate_candidates(misspelled_word)
-            
+            print(candidates)
+
             if not candidates:
                 print(f"⚠️ No valid candidates found for '{misspelled_word}'. Skipping.")
                 continue
-            
-            # Score the sentence for each candidate
+
             best_candidate = None
             best_score = -float('inf')
-            
-            # Temporarily replace the misspelled word with the candidate to score
-            for cand in candidates:
+            best_freq = -1
+
+            # sorted() makes iteration order deterministic across runs
+            for cand in sorted(candidates):
                 corrected_tokens[idx] = cand
                 score = self.score_sentence(corrected_tokens)
-                
-                if score > best_score:
-                    best_score = score
-                    best_candidate = cand
-            
-            # Update the original token list with the best candidate
-            corrected_tokens[idx] = best_candidate
-            print(f"🔍 '{misspelled_word}' -> '{best_candidate}' (Contextual Score: {best_score:.2f})")
-        
-        return ' '.join(corrected_tokens)
+                freq = self.unigram_counts.get(cand, 0)
 
+                # primary key: LM score, tiebreak: raw unigram frequency
+                if (score, freq) > (best_score, best_freq):
+                    best_score = score
+                    best_freq = freq
+                    best_candidate = cand
+
+            corrected_tokens[idx] = best_candidate
+            print(f"🔍 '{misspelled_word}' -> '{best_candidate}' (Contextual Score: {best_score:.2f}, Freq: {best_freq})")
+
+        return ' '.join(corrected_tokens)
 
 # --- Main Execution / Demo ---
 if __name__ == "__main__":
     # 1. Training Corpus
-    with open('assets/alice.txt', 'r', encoding='utf-8') as f:
+    with open('assets/text.txt', 'r', encoding='utf-8') as f:
         corpus = f.read()
 
     # 2. Input text with non-word spelling errors
