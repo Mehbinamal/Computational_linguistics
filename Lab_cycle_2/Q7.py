@@ -1,4 +1,4 @@
-def minimum_edit_distance(source, target, insert_cost=1, delete_cost=1, substitute_cost=1):
+def minimum_edit_distance(source, target, insert_cost=1, delete_cost=1, substitute_cost=2):
     m = len(source)
     n = len(target)
     #Distance matrix
@@ -48,8 +48,8 @@ def minimum_edit_distance(source, target, insert_cost=1, delete_cost=1, substitu
     return distance, operations
 
 
-s1 = "kitten"
-s2 = "sitting"
+s1 = "intention"
+s2 = "execution"
 dist, ops = minimum_edit_distance(s1, s2)
 print(f"Edit distance between '{s1}' and '{s2}': {dist}")
 print("Operations:")
