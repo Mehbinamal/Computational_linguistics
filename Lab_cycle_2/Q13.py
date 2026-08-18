@@ -44,8 +44,6 @@ class NaiveBayes:
         }
 
         self.vocabulary = set()
-
-
     # --------------------------------------------------
     # Training
     # --------------------------------------------------
@@ -64,8 +62,6 @@ class NaiveBayes:
                 self.total_words[label] += 1
 
                 self.vocabulary.add(word)
-
-
     # --------------------------------------------------
     # Prior probability P(class)
     # --------------------------------------------------
@@ -77,8 +73,6 @@ class NaiveBayes:
         )
 
         return self.class_counts[label] / total_documents
-
-
     # --------------------------------------------------
     # P(word | class)
     #
@@ -99,8 +93,6 @@ class NaiveBayes:
                 + self.k * vocabulary_size
             )
         )
-
-
     # --------------------------------------------------
     # Predict one document
     # --------------------------------------------------
@@ -133,8 +125,6 @@ class NaiveBayes:
             scores,
             key=scores.get
         )
-
-
     # --------------------------------------------------
     # Predict multiple documents
     # --------------------------------------------------
@@ -150,8 +140,6 @@ class NaiveBayes:
             )
 
         return np.array(predictions)
-
-
 # --------------------------------------------------
 # 3. Train and test for different k values
 # --------------------------------------------------
@@ -183,12 +171,9 @@ for k in k_values:
     results.append(
         (k, accuracy)
     )
-
-
 # --------------------------------------------------
 # 4. Display comparison
 # --------------------------------------------------
-
 print("\n\n===== RESULTS =====")
 
 for k, accuracy in results:
